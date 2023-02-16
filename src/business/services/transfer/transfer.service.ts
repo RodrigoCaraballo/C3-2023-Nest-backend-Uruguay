@@ -4,6 +4,7 @@ import { TransferEntity, TransferRepository } from 'src/data/persistence';
 import { CreateTransferDTO } from 'src/business/dtos/create-transfer.dto';
 import { AccountService } from '../account';
 import { AccountDTO } from '../../dtos/account.dto';
+import { PaginationModelAndDataRange } from 'src/data/models/pagination-and-data-range.model';
 
 
 @Injectable()
@@ -35,6 +36,8 @@ export class TransferService {
     newTransfer.reason = transfer.reason;
     newTransfer.dateTime = Date.now();
 
+    if(newTransfer.outcome === newTransfer.income) throw new Error('Cannot make a transfer to the same account');
+
     return this.transferRepository.register(newTransfer);
   }
 
@@ -53,16 +56,14 @@ export class TransferService {
    */
   getHistoryOut(
     accountId: string,
-    offset: number,
-    limit?: number,
-    dataRange?: DataRangeModel,
+    data: PaginationModelAndDataRange
   ): TransferEntity[] {
 
-    const pagination: PaginationModel = {offset: offset, limit: limit};
+    const pagination: PaginationModel = {offset: data.startItem || 0, limit: data.limitItem || 10};
 
-    dataRange = {
-      ... {dateStart: 0, dateEnd: Date.now()},
-      ... dataRange
+    const dataRange: DataRangeModel = {
+      dateStart: data.dateStart || 0,
+      dateEnd: data.dateEnd || Date.now()
     }
 
     return this.transferRepository.findOutcomeByDataRange(pagination ,accountId, dataRange.dateStart, dataRange.dateEnd);
@@ -79,16 +80,14 @@ export class TransferService {
    */
   getHistoryIn(
     accountId: string,
-    offset: number,
-    limit?: number,
-    dataRange?: DataRangeModel,
+    data: PaginationModelAndDataRange
   ): TransferEntity[] {
 
-    const pagination: PaginationModel = {offset: offset, limit: limit};
+    const pagination: PaginationModel = {offset: data.startItem || 0, limit: data.limitItem || 10};
 
-    dataRange = {
-      ... {dateStart: 0, dateEnd: Date.now()},
-      ... dataRange
+    const dataRange: DataRangeModel = {
+      dateStart: data.dateStart || 0,
+      dateEnd: data.dateEnd || Date.now()
     }
 
     return this.transferRepository.findIncomeByDataRange(pagination ,accountId, dataRange.dateStart, dataRange.dateEnd);
@@ -105,15 +104,13 @@ export class TransferService {
    */
   getHistory(
     accountId: string,
-    offset: number,
-    limit?: number,
-    dataRange?: DataRangeModel,
+    data: PaginationModelAndDataRange
   ): TransferEntity[] {
-    const pagination: PaginationModel = {offset: offset, limit: limit};
+    const pagination: PaginationModel = {offset: data.startItem || 0, limit: data.limitItem || 10};
 
-    dataRange = {
-      ... {dateStart: 0, dateEnd: Date.now()},
-      ... dataRange
+    const dataRange: DataRangeModel = {
+      dateStart: data.dateStart || 0,
+      dateEnd: data.dateEnd || Date.now()
     }
 
     return this.transferRepository.findByAccountIdAndDataRange(pagination ,accountId, dataRange.dateStart, dataRange.dateEnd);

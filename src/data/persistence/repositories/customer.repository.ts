@@ -76,6 +76,28 @@ export class CustomerRepository
     return indexCurrentEntity != -1 ? true : false;
   }
 
+  findByEmail(email: string): CustomerEntity {
+    const currentEntity = this.database.find(
+      (item) =>
+        item.email === email &&
+        typeof item.deletedAt === 'undefined',
+    );
+
+    if (!currentEntity) throw new NotFoundException();
+
+    return currentEntity;
+  }
+
+  checkEmail(email: string): boolean {
+    const indexCurrentEntity = this.database.findIndex(
+      (item) =>
+        item.email === email &&
+        typeof item.deletedAt === 'undefined',
+    );
+
+    return indexCurrentEntity === -1 ? false : true;
+  }
+
   findOneByDocumentTypeAndDocument(
     documentTypeId: string,
     document: string,

@@ -5,6 +5,7 @@ import { CreateDepositDTO } from 'src/business/dtos/create-deposit.dto';
 import { AccountService } from '../account';
 import { AccountDTO } from '../../dtos/account.dto';
 import { Subject } from 'rxjs';
+import { PaginationModelAndDataRange } from 'src/data/models/pagination-and-data-range.model';
 
 
 @Injectable()
@@ -38,7 +39,6 @@ export class DepositService {
     newDeposit.amount = deposit.amount;
     newDeposit.dateTime = Date.now();
 
-    this.depositSubject.next(newDeposit);
     this.accountService.addBalance(account.id, accountDTO);
 
     return this.depositRepository.register(newDeposit);
@@ -97,16 +97,16 @@ export class DepositService {
 
   getAccountHistory(
     accountId: string,
-    offset: number,
-    limit?: number,
-    dataRange?: DataRangeModel,
+    search: PaginationModelAndDataRange
   ): DepositEntity[] {    
 
-    const pagination: PaginationModel = {offset: offset, limit: limit}
+    console.log(search.startItem);
+    
+    const pagination: PaginationModel = {offset: search.startItem || 0, limit: search.limitItem || 10}
 
-    dataRange = {
-      ... {dateStart: 0, dateEnd: Date.now()},
-      ... dataRange
+    const dataRange: DataRangeModel = {
+      dateStart: search.dateStart || 0,
+      dateEnd: search.dateEnd || Date.now()
     }
 
     return this.depositRepository.findByAccountIdAndDataRange(pagination, accountId, dataRange.dateStart, dataRange.dateEnd);

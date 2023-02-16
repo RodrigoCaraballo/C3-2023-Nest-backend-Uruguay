@@ -4,6 +4,7 @@ import { TransferService } from 'src/business/services';
 import { DataRangeModel, PaginationModel } from 'src/data/models';
 import { TransferEntity } from 'src/data/persistence';
 import { CreateTransferDTO } from 'src/business/dtos/create-transfer.dto';
+import { PaginationModelAndDataRange } from 'src/data/models/pagination-and-data-range.model';
 
 
 @Controller('transfer')
@@ -22,19 +23,19 @@ export class TransferController {
         return this.transferService.findAll(paginator);
     }
 
-    @Get('/get-history-out/:id')
-    getHistoryOut(@Param('id') id: string,@Query('offset') offset: number, @Query('limit') limit?: number,@Body() dataRange?: DataRangeModel): TransferEntity[] {
-        return this.transferService.getHistoryOut(id, offset, limit, dataRange);
+    @Post('/get-history-out/:id')
+    getHistoryOut(@Param('id') id: string,@Body() data: PaginationModelAndDataRange): TransferEntity[] {
+        return this.transferService.getHistoryOut(id, data);
     }
 
-    @Get('/get-history-in/:id')
-    getHistoryIn(@Param('id') id: string,@Query('offset') offset: number, @Query('limit') limit?: number,@Body() dataRange?: DataRangeModel): TransferEntity[] {
-        return this.transferService.getHistoryIn(id, offset, limit, dataRange);
+    @Post('/get-history-in/:id')
+    getHistoryIn(@Param('id') id: string, @Body() data: PaginationModelAndDataRange): TransferEntity[] {
+        return this.transferService.getHistoryIn(id, data);
     }
     
-    @Get('/get-history/:id')
-    getHistory(@Param('id') id: string, @Query('offset') offset: number, @Query('limit') limit?: number, @Body() dataRange?: DataRangeModel): TransferEntity[] {
-        return this.transferService.getHistory(id, offset, limit, dataRange);
+    @Post('/get-history/:id')
+    getHistory(@Param('id') id: string, @Body() data: PaginationModelAndDataRange): TransferEntity[] {
+        return this.transferService.getHistory(id, data);
     }
 
     @Delete('/soft-delete/:id')

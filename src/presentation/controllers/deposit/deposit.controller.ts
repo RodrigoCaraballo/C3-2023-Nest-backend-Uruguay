@@ -1,21 +1,19 @@
-import { Body, Controller, Delete, Get, Param, Post, Query } from '@nestjs/common';
+import { Body, Controller, Delete, Get, Param, Post, Query, Put } from '@nestjs/common';
 import { DepositService } from 'src/business/services';
-import { DataRangeModel, PaginationModel } from 'src/data/models';
 import { DepositEntity } from 'src/data/persistence';
 import { CreateDepositDTO } from 'src/business/dtos/create-deposit.dto';
 import { Logger } from '@nestjs/common/services';
+import { PaginationModel } from 'src/data/models';
+import { PaginationModelAndDataRange } from 'src/data/models/pagination-and-data-range.model';
 ;
 
 @Controller('deposit')
 export class DepositController {
-    private logger = new Logger('DepositController');
 
     constructor(private readonly depositService: DepositService) {}
 
     @Post('/create')
     createDeposit(@Body() deposit: CreateDepositDTO): DepositEntity {
-        this.depositService.depositObservable.subscribe(deposit => 
-            this.logger.log(`New Deposit Account added to Customer: ${deposit.account.customer}`))
         return this.depositService.createDeposit(deposit);
     }
 
@@ -34,9 +32,9 @@ export class DepositController {
         this.depositService.deleteDeposit(id);
     }
 
-    @Get('/get-history/:id')
-    getHistory(@Param('id') id: string, @Query('offset') offset: number, @Query('limit') limit?: number, @Body() dateRange?: DataRangeModel): DepositEntity[] {
-        return this.depositService.getAccountHistory(id, offset, limit, dateRange);
+    @Post('/get-history/:id')
+    getHistory(@Param('id') id: string, @Body() search: PaginationModelAndDataRange): DepositEntity[] {
+        return this.depositService.getAccountHistory(id, search);
     }
 
     

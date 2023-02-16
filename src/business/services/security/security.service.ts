@@ -2,6 +2,7 @@ import {
   Injectable,
   InternalServerErrorException,
   UnauthorizedException,
+  Logger
 } from '@nestjs/common';
 import {
   AccountTypeRepository,
@@ -14,12 +15,13 @@ import * as jwt from 'jsonwebtoken';
 import { DocumentTypeRepository } from '../../../data/persistence/repositories/document-type.repository';
 import { NotAcceptableException } from '@nestjs/common/exceptions';
 import { CustomerService } from '../customer/customer.service';
-import { AccountTypeFactory } from '../../../data/FactoryPattern/AccountType/account-type-factory';
 import { DocumentTypeContext, NationalIdStrategy, PassportStrategy } from '../../../data/StrategyPattern/DocumentType/document-type-strategy';
-import { NationalID } from '../../../data/FactoryPattern/DocumentType/document-type-factory';
+import { SignInGoogleDTO } from '../../dtos/sign-in.dto';
 
 @Injectable()
 export class SecurityService {
+  private logger = new Logger('SecurityService');
+
   constructor(
     private readonly customerRepository: CustomerRepository,
     private readonly accountService: AccountService,
@@ -43,8 +45,25 @@ export class SecurityService {
 
     if (!answer) throw new UnauthorizedException();
 
+    const finalUser = this.customerRepository.findByEmail(user.username)
+
     return jwt.sign(
-      { id: user.username },
+      {id: finalUser.id},
+      process.env.TOKEN_SECRET || 'tokentest',
+    );
+  }
+
+  signInGoogle(user: SignInGoogleDTO): string {
+    const answer = this.customerRepository.checkEmail(
+      user.username,
+    );
+
+    if (!answer) throw new UnauthorizedException();
+
+    const finalUser = this.customerRepository.findByEmail(user.username)
+
+    return jwt.sign(
+      {id: finalUser.id},
       process.env.TOKEN_SECRET || 'tokentest',
     );
   }
@@ -60,6 +79,7 @@ export class SecurityService {
     const newCustomer = new CustomerEntity();
 
     if(user.documentType != 'National ID' && user.documentType != 'Passport ID') throw new NotAcceptableException();
+    if(this.customerRepository.checkEmail(user.email)) throw new Error('This email is in use');
 
     if(user.documentType === 'National ID') {
       const strategy = new NationalIdStrategy();
@@ -93,8 +113,10 @@ export class SecurityService {
 
       if (!account) throw new InternalServerErrorException();
 
+      const finalUser = this.customerRepository.findByEmail(user.email)
+
       return jwt.sign(
-        { email: user.email, password: user.password },
+        {id: finalUser.id},
         process.env.TOKEN_SECRET || 'tokentest',
       );
     } else throw new InternalServerErrorException();
@@ -106,9 +128,9 @@ export class SecurityService {
    * @param {string} JWToken
    * @memberof SecurityService
    */
-  signOut(JWToken: string): void {
-    if(!jwt.verify(JWToken, process.env.TOKEN_SECRET || 'tokentest')) throw new Error('JWT Not Valid')
-  
-    console.log('SignOut Completed')
+  signOut(JWToken: string): boolean {
+    if(!jwt.verify(JWToken, process.env.TOKEN_SECRET || 'tokentest')) return false
+    
+    return true
   }
 }

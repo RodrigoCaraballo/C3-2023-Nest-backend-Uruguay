@@ -134,7 +134,12 @@ export class CustomerService {
       this.customerRepository.delete(customerId);
   }
 
+  checkEmail(email: string): boolean {
+    return this.customerRepository.checkEmail(email);
+  }
+
   private getCustomer(customerId: string): CustomerEntity {
     return this.customerRepository.findOneById(customerId);
   }
+
 }

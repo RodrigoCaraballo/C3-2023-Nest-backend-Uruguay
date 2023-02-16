@@ -13,7 +13,7 @@ export class TransferRepository
     const indexCurrentEntity = this.findIndex(entity.id);
     if (indexCurrentEntity != -1) throw new Error('The Transfer already exists');
 
-    this.database.push(entity);
+    this.database.unshift(entity);
     return this.database.at(-1) ?? entity;
   }
 

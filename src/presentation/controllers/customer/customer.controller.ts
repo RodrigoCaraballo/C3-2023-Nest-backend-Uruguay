@@ -50,4 +50,9 @@ export class CustomerController {
     changeState(@Param('id') id: string): void {
         this.customerService.changeState(id);
     }
+
+    @Get('/check-email/:email')
+    checkEmail(@Param('email') email: string): boolean {
+        return this.customerService.checkEmail(email);
+    }
 }

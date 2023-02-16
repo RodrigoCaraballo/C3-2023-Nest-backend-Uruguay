@@ -9,3 +9,10 @@ export class SignInDTO {
     @IsString()
     password: string;
 }
+
+export class SignInGoogleDTO {
+
+    @IsEmail(undefined, { message: 'the data provider is not a valid email.' })
+    @IsString()
+    username: string;
+}
