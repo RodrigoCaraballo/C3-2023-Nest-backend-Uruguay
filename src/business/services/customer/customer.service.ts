@@ -72,7 +72,7 @@ export class CustomerService {
 
   updatedCustomer(id: string, newCustomer: UpdateCustomerDTO): CustomerEntity {
     let customer = this.getCustomer(id);
-
+    
     if (newCustomer.documentType === 'National ID') {
       const national = new NationalIdStrategy();
       const accountTypeContext = new DocumentTypeContext(national);
@@ -81,17 +81,14 @@ export class CustomerService {
     else if (newCustomer.documentType === 'Passport ID') {
       const passport = new PassportStrategy();
       const accountTypeContext = new DocumentTypeContext(passport);
-
+      
       customer.documentType = accountTypeContext.assignAccountTypeStrategy();
     }
-
-
+    
     customer.document = newCustomer.document;
     customer.email = newCustomer.email;
     customer.fullName = newCustomer.fullName;
-    customer.password = newCustomer.password;
     customer.phone = newCustomer.phone;
-    customer.state = newCustomer.state;
 
     return this.customerRepository.update(id, customer);
   }
